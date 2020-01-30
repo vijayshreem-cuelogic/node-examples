@@ -13,18 +13,17 @@ class Person{
     }
   }
 
-  static dbCollectionObject // error
-
   static async connect(url){
     var db = await MongoClient.connect(url)
     console.log('DB connected');
     return db
   }
 
-  static async createCollection(db){
+  static async createUserCollection(dbConnection){
     // static variable
-    dbCollectionObject = await db.createCollection("User")
+    dbCollection = await eval(dbConnection).createCollection("User")
     console.log("Collection created!");
+    return dbCollection
   }
 
   async insertUser(){
@@ -32,7 +31,7 @@ class Person{
     console.log("1 document inserted");
   }
 
-  static createUser(dbConnection, name, email){
+  static createUser(name, email){
     var user = new Person(name, email)
     user.insertUser();
     return user
@@ -40,8 +39,10 @@ class Person{
 }
 
 try{
-  dbConnection = Person.connect(process.env.DB).then(createCollection())
-  user = Person.create(dbConnection, 'Test', 'test@gmail.com')  
+  var dbConnection = Person.connect(url)
+  Person.dbCollectionObject = Person.createUserCollection(dbConnection)
+  var user = Person.createUser('Test', 'test@gmail.com')  
+  console.log('User Created'.concat(user))
 }
 catch(e)
 {
